@@ -50,6 +50,11 @@ def test_parse_no_equals():
     assert _parse_line("JUST_A_KEY") is None
 
 
+def test_parse_empty_value():
+    """A key with no value after '=' should return an empty string."""
+    assert _parse_line("EMPTY=") == ("EMPTY", "")
+
+
 # ---------------------------------------------------------------------------
 # load_env_file integration tests
 # ---------------------------------------------------------------------------
@@ -108,3 +113,12 @@ def test_load_with_override(tmp_path, monkeypatch):
 def test_load_missing_file():
     with pytest.raises(FileNotFoundError):
         load_env_file("/nonexistent/.env")
+
+
+def test_load_returns_only_parsed_keys(env_file, monkeypatch):
+    """load_env_file should not include comment lines or blank lines as keys."""
+    monkeypatch.delenv("PORT", raising=False)
+    result = load_env_file(env_file)
+    for key in result:
+        assert not key.startswith("#"), f"Comment ended up as key: {key!r}"
+        assert key.strip(), "Blank line ended up as key"
