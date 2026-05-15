@@ -51,6 +51,11 @@ class CompareReport:
             f"={len(self.unchanged)} unchanged"
         )
 
+    def filter_by_keys(self, keys: List[str]) -> "CompareReport":
+        """Return a new CompareReport containing only entries whose keys are in *keys*."""
+        key_set = set(keys)
+        return CompareReport(entries=[e for e in self.entries if e.key in key_set])
+
 
 def compare_dicts(
     left: Dict[str, str],
@@ -58,7 +63,19 @@ def compare_dicts(
     *,
     include_unchanged: bool = True,
 ) -> CompareReport:
-    """Compare two env dicts and return a CompareReport."""
+    """Compare two env dicts and return a CompareReport.
+
+    Args:
+        left: The baseline environment dictionary.
+        right: The target environment dictionary to compare against *left*.
+        include_unchanged: When ``True`` (default), entries whose values are
+            identical in both dicts are included in the report with status
+            ``'unchanged'``.  Set to ``False`` to omit them.
+
+    Returns:
+        A :class:`CompareReport` containing one :class:`CompareEntry` per key
+        found in either dict.
+    """
     all_keys = sorted(set(left) | set(right))
     entries: List[CompareEntry] = []
 
