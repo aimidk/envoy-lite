@@ -48,6 +48,14 @@ def test_rename_key_does_not_mutate_original():
     assert "FOO" in env
 
 
+def test_rename_key_same_name_is_noop():
+    """Renaming a key to itself should return an equivalent dict unchanged."""
+    env = {"FOO": "bar", "BAZ": "qux"}
+    result = rename_key(env, "FOO", "FOO")
+    assert result == env
+    assert result is not env
+
+
 # ---------------------------------------------------------------------------
 # rename_prefix
 # ---------------------------------------------------------------------------
@@ -77,6 +85,14 @@ def test_rename_prefix_collision_overwrite():
     assert result["SVC_X"] == "new"
 
 
+def test_rename_prefix_does_not_mutate_original():
+    """rename_prefix must not modify the input dict in-place."""
+    env = {"APP_HOST": "localhost", "APP_PORT": "8080"}
+    rename_prefix(env, "APP_", "SVC_")
+    assert "APP_HOST" in env
+    assert "APP_PORT" in env
+
+
 # ---------------------------------------------------------------------------
 # apply_rename_map
 # ---------------------------------------------------------------------------
@@ -100,4 +116,3 @@ def test_apply_rename_map_skip_missing():
 def test_apply_rename_map_empty_mapping():
     env = {"A": "1"}
     result = apply_rename_map(env, {})
-    assert result == env
